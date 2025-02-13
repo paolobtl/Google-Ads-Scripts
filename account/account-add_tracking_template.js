@@ -27,7 +27,7 @@ function main() {
     var trackingTemplateCampaign = "{lpurl}?utm_source=google&utm_medium=cpc&utm_campaign={campaignid}";
     var includeAdGroupId = false; 
     var includePaused = false;
-    processCampaigns()
+    processCampaigns();
 }
 
 function processCampaigns() {
