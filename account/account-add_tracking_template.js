@@ -1,4 +1,3 @@
-function main() {
 /**
  * Google Ads Script - Update Tracking Templates
  *
@@ -24,41 +23,55 @@ function main() {
  * Copyright: Paolo Bietolini - 2025
  * paolobietolini.com
  */
-    var trackingTemplateCampaign = "{lpurl}?utm_source=google&utm_medium=cpc&utm_campaign={campaignid}";
-    var includeAdGroupId = false; 
-    var includePaused = false;
-    processCampaigns();
+
+var trackingTemplateCampaign = "{lpurl}?utm_source=google&utm_medium=cpc&utm_campaign={campaignid}";
+var includeAdGroupId = false; 
+var includePaused = false;
+const log = (t) => {Logger.log(t)}
+
+function main() {
+  processCampaigns();
 }
 
 function processCampaigns() {
-    
-    var trackingTemplateAdGroup = trackingTemplateCampaign + "&utm_adgroupid={adgroupid}";
-    var condition = includePaused ? "Status IN ['ENABLED', 'PAUSED']" : "Status = 'ENABLED'";
-  
-    const CTYPES = ['performanceMaxCampaigns', 'campaigns'];
-    for (const type of CTYPES) {
-      var campaigns = AdsApp[type]()
-        .withCondition(condition)
-        .get();
-  
-      while (campaigns.hasNext()) {
-        var campaign = campaigns.next();
-        Logger.log("Update Tracking Template for the campaign: " + campaign.getName());
-        campaign.urls().setTrackingTemplate(trackingTemplateCampaign);
+
+  var trackingTemplateAdGroup = trackingTemplateCampaign + "&utm_adgroupid={adgroupid}";
+  var condition = includePaused ? "Status IN ['ENABLED', 'PAUSED']" : "Status = 'ENABLED'";
+
+  const CTYPES = ['performanceMaxCampaigns', 'campaigns'];
+  for (const type of CTYPES) {
+    var campaigns = AdsApp[type]()
+      .withCondition(condition)
+      .get();
+
+    while (campaigns.hasNext()) {
+      var campaign = campaigns.next();
+      var campaignName = campaign.getName();
+      var campaignTrackingTemplate = campaign.urls().getTrackingTemplate();
+      if(campaignTrackingTemplate && campaignTrackingTemplate.trim() !== '') {
+        log(`${campaignName} - Overwriting: ${campaignTrackingTemplate}`)
       }
+      campaign.urls().setTrackingTemplate(trackingTemplateCampaign);
+      log(`Updating Tracking Template for the campaign: ${campaignName} [${campaign.getId()}]`);
     }
-  
-    if (includeAdGroupId) {
-      var adGroups = AdsApp.adGroups()
-        .withCondition(condition)
-        .get();
-  
-      while (adGroups.hasNext()) {
-        var adGroup = adGroups.next();
-        Logger.log("Update Tracking Template for the ad group: " + adGroup.getName());
-        adGroup.urls().setTrackingTemplate(trackingTemplateAdGroup);
-      }
-    }
-  
-    Logger.log("Tracking Template updated for account: " + AdsApp.currentAccount().getCustomerId());
   }
+
+  if (includeAdGroupId) {
+    var adGroups = AdsApp.adGroups()
+      .withCondition(condition)
+      .get();
+
+    while (adGroups.hasNext()) {
+      var adGroup = adGroups.next();
+      var adGroupName = adGroup.getName();
+      var adgroupTrackingTemplate = adGroup.urls().getTrackingTemplate();
+      if(adgroupTrackingTemplate && adgroupTrackingTemplate.trim() !== '') {
+        log(`${adGroupName} - Overwriting: ${adgroupTrackingTemplate}`)
+      }
+      adGroup.urls().setTrackingTemplate(trackingTemplateAdGroup);
+      log(`Updating Tracking Template for the ad group: ${adGroupName} [${adGroup.getId()}]`);
+    }
+  }
+
+  log("Tracking Template updated for account: " + AdsApp.currentAccount().getCustomerId());
+}
