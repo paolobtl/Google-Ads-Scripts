@@ -1,6 +1,9 @@
 /**
  * Google Ads Broken Link Checker
- * Checks all ad URLs in the account and logs broken links to Google Sheets
+ * Checks all ad URLs in the account and logs broken links to Google Sheets.
+ * Ads with broken links will be paused.
+ *
+ *
  * Paolo Bietolini 2025
  * paolobietolini.com
  */
